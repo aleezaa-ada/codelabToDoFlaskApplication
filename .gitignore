@@ -7,3 +7,10 @@ __pycache__/
 .venv/
 env/
 venv/
+
+#put secrets in local env
+.env
+
+#avoiding commiting of data
+*.db
+instance/

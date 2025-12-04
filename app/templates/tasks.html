@@ -1,7 +1,21 @@
 {% extends 'base.html' %}
 
 {% block main %}
-    <h1>View all tasks</h1>
+<h1>{{ name }}'s Tasks</h1>
+
+<a href="{{ url_for('main.create_task', name=name) }}">New Task</a>
+
+<ul>
+{% for todo in todos %}
+    <li>
+        {% if todo.completed %}<s>{{ todo.title }}</s>{% else %}{{ todo.title }}{% endif %}
+        <a href="{{ url_for('main.edit_task', name=name, task_id=todo.id) }}">Edit</a>
+        <form action="{{ url_for('main.delete_task', name=name, task_id=todo.id) }}" method="post" style="display:inline">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+{% else %}
+    <li>No tasks yet.</li>
+{% endfor %}
+</ul>
 {% endblock %}
-
-
