@@ -1,11 +1,13 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect
 from dotenv import load_dotenv
 
 load_dotenv()
 
 db = SQLAlchemy()
+csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
@@ -15,6 +17,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    csrf.init_app(app)
 
     from app.routes import main
     app.register_blueprint(main)
