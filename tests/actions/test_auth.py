@@ -1,5 +1,5 @@
 # tests/actions/test_auth.py
-from app.models import User, Todo
+from app.models import User
 from tests.helpers import register_and_login
 
 
@@ -16,7 +16,7 @@ def test_login_creates_user(client, app):
 
 
 def test_logout_clears_session_and_blocks_home(client, app):
-    username = register_and_login(client, "logoutUser")
+    register_and_login(client, "logoutUser")
 
     # logout
     client.get("/logout", follow_redirects=True)
@@ -26,7 +26,7 @@ def test_logout_clears_session_and_blocks_home(client, app):
     assert b"Please log in first." in response.data
     assert b"Login" in response.data
 def test_logout_clears_session(client, app):
-    username = register_and_login(client, "logoutUser")
+    register_and_login(client, "logoutUser")
 
     # Log out
     response = client.get("/logout", follow_redirects=True)
@@ -43,7 +43,7 @@ def test_logout_clears_session(client, app):
 
 
 def test_cannot_access_home_after_logout(client, app):
-    username = register_and_login(client, "u1")
+    register_and_login(client, "u1")
 
     # logout
     client.get("/logout", follow_redirects=True)

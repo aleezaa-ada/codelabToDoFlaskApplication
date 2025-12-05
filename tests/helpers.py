@@ -1,5 +1,4 @@
 # tests/helpers.py
-from app.models import User, Todo
 
 def register_and_login(client, username="alice", password="test123"):
     client.post("/register", data={
