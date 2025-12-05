@@ -1,21 +1,32 @@
 {% extends "base.html" %}
 
 {% block main %}
-<h2>Login</h2>
+<div class="page auth-page">
+  <div class="card auth-card">
+    <h2 class="card-title">Login</h2>
 
-<form method="POST">
-    {{ form.hidden_tag() }}
+    <form method="POST" class="form">
+        {{ form.hidden_tag() }}
 
-    <p>{{ form.username.label }}<br>{{ form.username() }}</p>
-    <p>{{ form.password.label }}<br>{{ form.password() }}</p>
+        <div class="form-group">
+          {{ form.username.label(class="form-label") }}
+          {{ form.username(class="form-input") }}
+        </div>
 
-    <p>{{ form.submit() }}</p>
-</form>
+        <div class="form-group">
+          {{ form.password.label(class="form-label") }}
+          {{ form.password(class="form-input") }}
+        </div>
 
-<p>Don't have an account?
-   <a href="{{ url_for('main.register') }}">Register</a>
-</p>
+        <div class="form-actions">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
 
-</body>
-</html>
+    <p class="auth-switch">
+      Don't have an account?
+      <a href="{{ url_for('main.register') }}">Register</a>
+    </p>
+  </div>
+</div>
 {% endblock %}

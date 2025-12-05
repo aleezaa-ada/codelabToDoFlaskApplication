@@ -5,26 +5,40 @@
 {% endblock %}
 
 {% block main %}
-<ul>
-{% for todo in todos %}
-    <li>
-        {% if todo.completed %}
-            <s>{{ todo.title }}</s>
-        {% else %}
-            {{ todo.title }}
-        {% endif %}
+<div class="page content-page">
+  <div class="card">
+    <h1 class="card-title">{{ name }}'s Tasks</h1>
 
-        <a href="{{ url_for('main.edit_task', name=name, task_id=todo.id) }}">Edit</a>
+    {% if todos %}
+      <ul class="task-list">
+      {% for todo in todos %}
+        <li class="task-item {% if todo.completed %}task-completed{% endif %}">
+          <span class="task-title">
+            {% if todo.completed %}
+              <s>{{ todo.title }}</s>
+            {% else %}
+              {{ todo.title }}
+            {% endif %}
+          </span>
 
-        <form method="post" 
-              action="{{ url_for('main.delete_task', name=name, task_id=todo.id) }}" 
-              style="display:inline">
-            {{ delete_form.hidden_tag() }}
-            {{ delete_form.submit }}
-        </form>
-    </li>
-{% else %}
-    <li>No tasks yet.</li>
-{% endfor %}
-</ul>
+          <div class="task-actions">
+            <a href="{{ url_for('main.edit_task', name=name, task_id=todo.id) }}" class="btn btn-secondary btn-sm">
+              Edit
+            </a>
+
+            <form method="post" 
+                  action="{{ url_for('main.delete_task', name=name, task_id=todo.id) }}" 
+                  class="inline-form">
+                {{ delete_form.hidden_tag() }}
+                {{ delete_form.submit(class="btn btn-danger btn-sm") }}
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-state">No tasks yet. <a href="{{ url_for('main.create_task', name=name) }}">Create one?</a></p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
