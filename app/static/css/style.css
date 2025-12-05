@@ -1,0 +1,117 @@
+/* Navigation Styling */
+:root {
+    --nav-bg: #2a2a2a;
+    --nav-text: #ffffff;
+    --nav-hover: #ffdd57;
+    --nav-link-hover-bg: rgba(255, 255, 255, 0.15);
+    --nav-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --nav-padding: 0.75rem 1.25rem;
+    --nav-font: "Arial", sans-serif;
+}
+
+.navbar {
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+    padding: var(--nav-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--nav-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+    font-family: var(--nav-font);
+}
+
+.navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-links li {
+    display: inline-block;
+}
+
+.navbar-links a {
+    text-decoration: none;
+    color: var(--nav-text);
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-family: var(--nav-font);
+}
+
+.navbar-links a:hover {
+    background-color: var(--nav-link-hover-bg);
+    color: var(--nav-hover);
+}
+
+/* Highlight Active Link (optional, if you set it in templates) */
+.navbar-links a.active {
+    background-color: var(--nav-hover);
+    color: #000;
+    font-weight: bold;
+}
+
+/* Mobile Responsive Navigation */
+@media (max-width: 650px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+
+    .navbar-links a {
+        width: 100%;
+        display: block;
+    }
+}
+
+
+/* Simple flash styling */
+        .flash-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+        }
+
+        .flash {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            opacity: 1;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .flash.success {
+            background-color: #d4edda;
+        }
+
+        .flash.error {
+            background-color: #f8d7da;
+        }
+
+        .flash.fade-out {
+            opacity: 0;
+        }
+
+

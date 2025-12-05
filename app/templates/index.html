@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Todo Page</title>
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-</head>
-<body>
-  <nav>
-    <h1>Task List Application</h1>
-    <ul>
-      <li class="navlink"><a href="{{ url_for('main.tasks', name=name) }}">View Tasks</a></li>
-      <li class="navlink"><a href="{{ url_for('main.create_task', name=name) }}">New Task</a></li>
-            <li class="navlink"><a href="{{ url_for('main.logout') }}">Logout</a></li>
-    </ul>
-  </nav>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block nav %}
+  {% include "components/nav.html" %}
+{% endblock %}
+
+{% block main %}
+{% endblock %}

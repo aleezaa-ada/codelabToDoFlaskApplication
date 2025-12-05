@@ -1,8 +1,7 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, session
 from . import db
 from .models import User, Todo
-from .forms import LoginForm, RegisterForm, TaskForm
+from .forms import DeleteForm, EditTaskForm, LoginForm, RegisterForm, TaskForm
 
 main = Blueprint('main', __name__)
 
@@ -35,15 +34,11 @@ def register():
 
     return render_template("register.html", form=form)
 
-@main.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET','POST'])
 def login():
     form = LoginForm()
 
-    # 🔍 DEBUG — shows why validation is failing
-    print("VALID:", form.validate_on_submit())
-    print("errors:", form.errors)
-
-    if form.validate_on_submit():  # POST + valid
+    if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
 
@@ -57,15 +52,27 @@ def login():
             flash("Incorrect password", "error")
             return render_template("login.html", form=form)
 
-        return redirect(url_for('main.home', name=username))
-
+        # STORE user in the session
+        session['username'] = username
+        flash("You have been logged in.", "success")
+        return redirect(url_for('main.home'))
+    
     return render_template("login.html", form=form)
+
 
 @main.route('/home')
 def home():
-    name = request.args.get('name')
+    name = session.get('username')
+    if not name:
+        return redirect(url_for('main.login'))
     return render_template('index.html', name=name)
 
+
+@main.route('/logout')
+def logout():
+    session.pop('username', None)  # Remove user from session
+    flash("You have been logged out.", "success")
+    return redirect(url_for('main.login'))
 
 #create
 @main.route("/new-task/<name>", methods=['GET', 'POST'])
@@ -91,7 +98,10 @@ def create_task(name):
 def tasks(name):
     user = User.query.filter_by(username=name).first_or_404()
     todos = user.todos
-    return render_template("tasks.html", name=name, todos=todos)
+
+    delete_form = DeleteForm() 
+
+    return render_template("tasks.html", name=name, todos=todos, delete_form=delete_form)
 
 @main.route("/task/<name>/<int:task_id>")
 def task(name, task_id):
@@ -102,23 +112,25 @@ def task(name, task_id):
 @main.route("/edit-task/<name>/<int:task_id>", methods=['GET', 'POST'])
 def edit_task(name, task_id):
     todo = Todo.query.get_or_404(task_id)
-    if request.method == 'POST':
-        todo.title = request.form.get('title')
-        todo.completed = 'completed' in request.form
+    form = EditTaskForm(obj=todo)
+
+    if form.validate_on_submit():
+        todo.title = form.title.data
+        todo.completed = form.completed.data
         db.session.commit()
         flash("Task updated!", "success")
         return redirect(url_for('main.tasks', name=name))
-    return render_template("edit_task.html", todo=todo, name=name)
+
+    return render_template("edit_task.html", form=form, todo=todo, name=name)
 
 #delete
 @main.route("/delete-task/<name>/<int:task_id>", methods=['POST'])
 def delete_task(name, task_id):
-    todo = Todo.query.get_or_404(task_id)
-    db.session.delete(todo)
-    db.session.commit()
-    flash("Task deleted!", "success")
+    form = DeleteForm()
+    if form.validate_on_submit():
+        todo = Todo.query.get_or_404(task_id)
+        db.session.delete(todo)
+        db.session.commit()
+        flash("Task deleted!", "success")
     return redirect(url_for('main.tasks', name=name))
 
-@main.route('/logout')
-def logout():
-    return redirect(url_for('main.login'))

@@ -1,4 +1,3 @@
-import pytest
 from app.models import User, Todo
 
 def test_login_creates_user(client, app):
@@ -26,7 +25,7 @@ def test_create_and_view_task(client, app):
 
 def test_create_task_empty_title(client, app):
     client.post("/login", data={"nm": "bob"}, follow_redirects=True)
-    response = client.post("/new-task/bob", data={"title": ""}, follow_redirects=True)
+    client.post("/new-task/bob", data={"title": ""}, follow_redirects=True)
     
     with app.app_context():
         user = User.query.filter_by(username="bob").first()

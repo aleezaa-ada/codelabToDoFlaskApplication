@@ -1,0 +1,8 @@
+<nav class="navbar">
+  <h1 class="navbar-title"><a href="{{ url_for('main.home', name=name) }}"></a>Task List Application</a></h1>
+  <ul class="navbar-links">
+    <li><a href="{{ url_for('main.tasks', name=name) }}">View Tasks</a></li>
+    <li><a href="{{ url_for('main.create_task', name=name) }}">New Task</a></li>
+    <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
+  </ul>
+</nav>
