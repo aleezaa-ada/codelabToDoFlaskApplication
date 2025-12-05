@@ -1,65 +1,111 @@
 from app.models import User, Todo
 
+
+def register_and_login(client, username="alice", password="test123"):
+    """Helper to register + log in a user."""
+    client.post("/register", data={
+        "username": username,
+        "password": password
+    }, follow_redirects=True)
+
+    client.post("/login", data={
+        "username": username,
+        "password": password
+    }, follow_redirects=True)
+
+    return username
+
+
 def test_login_creates_user(client, app):
-    response = client.post("/login", data={"nm": "alice"}, follow_redirects=True)
+    username = "alice"
+
+    # Register user first
+    client.post("/register", data={"username": username, "password": "test123"}, follow_redirects=True)
+
+    # Then login
+    response = client.post("/login", data={"username": username, "password": "test123"}, follow_redirects=True)
     assert response.status_code == 200
+
     with app.app_context():
-        user = User.query.filter_by(username="alice").first()
+        user = User.query.filter_by(username=username).first()
         assert user is not None
 
+
 def test_create_and_view_task(client, app):
-    # Create a user
-    client.post("/login", data={"nm": "alice"}, follow_redirects=True)
+    username = register_and_login(client, "alice")
 
     # Create a new task
-    response = client.post("/new-task/alice", data={"title": "Test Task"}, follow_redirects=True)
-
-    # check that the task appears in the HTML
+    response = client.post(f"/new-task/{username}", data={"title": "Test Task"}, follow_redirects=True)
     assert b"Test Task" in response.data
 
-    # Check in the DB as well
+    # Check DB
     with app.app_context():
-        user = User.query.filter_by(username="alice").first()
+        user = User.query.filter_by(username=username).first()
         assert len(user.todos) == 1
         assert user.todos[0].title == "Test Task"
 
+
 def test_create_task_empty_title(client, app):
-    client.post("/login", data={"nm": "bob"}, follow_redirects=True)
-    client.post("/new-task/bob", data={"title": ""}, follow_redirects=True)
-    
+    username = register_and_login(client, "bob")
+
+    # Submit empty title
+    client.post(f"/new-task/{username}", data={"title": ""}, follow_redirects=True)
+
     with app.app_context():
-        user = User.query.filter_by(username="bob").first()
+        user = User.query.filter_by(username=username).first()
+        # Validation should prevent task creation
         assert len(user.todos) == 0
 
+
 def test_view_tasks(client, app):
-    client.post("/login", data={"nm": "carol"}, follow_redirects=True)
-    client.post("/new-task/carol", data={"title": "Task 1"}, follow_redirects=True)
-    client.post("/new-task/carol", data={"title": "Task 2"}, follow_redirects=True)
-    response = client.get("/tasks/carol")
+    username = register_and_login(client, "carol")
+
+    client.post(f"/new-task/{username}", data={"title": "Task 1"}, follow_redirects=True)
+    client.post(f"/new-task/{username}", data={"title": "Task 2"}, follow_redirects=True)
+
+    response = client.get(f"/tasks/{username}")
     assert b"Task 1" in response.data
     assert b"Task 2" in response.data
 
+
 def test_edit_task(client, app):
-    client.post("/login", data={"nm": "dave"}, follow_redirects=True)
-    client.post("/new-task/dave", data={"title": "Old Task"}, follow_redirects=True)
-    
+    username = register_and_login(client, "dave")
+
+    # Create task
+    client.post(f"/new-task/{username}", data={"title": "Old Task"}, follow_redirects=True)
+
     with app.app_context():
         task = Todo.query.filter_by(title="Old Task").first()
-    
-    response = client.post(f"/edit-task/dave/{task.id}", data={"title": "Updated Task"}, follow_redirects=True)
+        assert task is not None
+
+    # Update it
+    response = client.post(
+        f"/edit-task/{username}/{task.id}",
+        data={"title": "Updated Task", "completed": False},
+        follow_redirects=True
+    )
+
     assert b"Updated Task" in response.data
 
+
 def test_delete_task(client, app):
-    client.post("/login", data={"nm": "eve"}, follow_redirects=True)
-    client.post("/new-task/eve", data={"title": "Delete Me"}, follow_redirects=True)
-    
+    username = register_and_login(client, "eve")
+
+    # Create task
+    client.post(f"/new-task/{username}", data={"title": "Delete Me"}, follow_redirects=True)
+
     with app.app_context():
         task = Todo.query.filter_by(title="Delete Me").first()
-    
-    response = client.post(f"/delete-task/eve/{task.id}", follow_redirects=True)
+        assert task is not None
 
-    # Ensure the deleted task no longer appears in the page
+    # Delete task
+    response = client.post(
+        f"/delete-task/{username}/{task.id}",
+        follow_redirects=True
+    )
+
     assert b"Delete Me" not in response.data
+
     with app.app_context():
         deleted = Todo.query.filter_by(title="Delete Me").first()
         assert deleted is None
