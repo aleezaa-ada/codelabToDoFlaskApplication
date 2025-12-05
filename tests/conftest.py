@@ -3,12 +3,7 @@ import pytest
 from dotenv import load_dotenv
 from app import create_app, db
 
-
-dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env.testing"))
-
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
-
+load_dotenv()
 
 @pytest.fixture
 def app():

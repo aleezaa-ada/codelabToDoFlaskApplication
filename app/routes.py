@@ -118,8 +118,8 @@ def tasks(name):
 
 
 #update
-@login_required
 @main.route("/edit-task/<name>/<int:task_id>", methods=['GET', 'POST'])
+@login_required
 def edit_task(name, task_id):
     todo = Todo.query.get_or_404(task_id)
     form = EditTaskForm(obj=todo)
