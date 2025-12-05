@@ -2,8 +2,18 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session
 from . import db
 from .models import User, Todo
 from .forms import DeleteForm, EditTaskForm, LoginForm, RegisterForm, TaskForm
+from functools import wraps
 
 main = Blueprint('main', __name__)
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'username' not in session:
+            flash("Please log in first.", "error")
+            return redirect(url_for('main.login'))
+        return f(*args, **kwargs)
+    return wrapper
 
 
 @main.route('/')
@@ -59,8 +69,15 @@ def login():
     
     return render_template("login.html", form=form)
 
+@main.route('/logout')
+def logout():
+    session.pop('username', None)  # Remove user from session
+    flash("You have been logged out.", "success")
+    return redirect(url_for('main.login'))
+
 
 @main.route('/home')
+@login_required
 def home():
     name = session.get('username')
     if not name:
@@ -68,14 +85,9 @@ def home():
     return render_template('index.html', name=name)
 
 
-@main.route('/logout')
-def logout():
-    session.pop('username', None)  # Remove user from session
-    flash("You have been logged out.", "success")
-    return redirect(url_for('main.login'))
-
 #create
 @main.route("/new-task/<name>", methods=['GET', 'POST'])
+@login_required
 def create_task(name):
     user = User.query.filter_by(username=name).first_or_404()
     form = TaskForm()
@@ -95,6 +107,7 @@ def create_task(name):
     
 #read
 @main.route("/tasks/<name>")
+@login_required
 def tasks(name):
     user = User.query.filter_by(username=name).first_or_404()
     todos = user.todos
@@ -103,12 +116,9 @@ def tasks(name):
 
     return render_template("tasks.html", name=name, todos=todos, delete_form=delete_form)
 
-@main.route("/task/<name>/<int:task_id>")
-def task(name, task_id):
-    todo = Todo.query.get_or_404(task_id)
-    return f"<h1>Task detail page for task {todo.title}</h1>"
 
 #update
+@login_required
 @main.route("/edit-task/<name>/<int:task_id>", methods=['GET', 'POST'])
 def edit_task(name, task_id):
     todo = Todo.query.get_or_404(task_id)
@@ -125,6 +135,7 @@ def edit_task(name, task_id):
 
 #delete
 @main.route("/delete-task/<name>/<int:task_id>", methods=['POST'])
+@login_required
 def delete_task(name, task_id):
     form = DeleteForm()
     if form.validate_on_submit():
