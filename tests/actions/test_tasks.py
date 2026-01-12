@@ -1,4 +1,3 @@
-# tests/actions/test_tasks.py
 from app.models import User, Todo
 from tests.helpers import register_and_login
 
