@@ -1,4 +1,3 @@
-# tests/actions/test_auth.py
 from app.models import User
 from tests.helpers import register_and_login
 
